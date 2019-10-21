@@ -58,5 +58,6 @@ class stock_available_volume_cvm_code_crawler():
         else:
             return False
 
+
         return True
     pass
