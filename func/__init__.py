@@ -3,6 +3,7 @@ import azure.functions as func
 import json
 import requests
 import pathlib
+import threading
 
 from .models.stock import stock
 from .crawler import stock_available_volume_cvm_code_crawler
@@ -44,7 +45,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         else:
             
             # At this time, we are not looking for HTTP response
-            requests.request("POST", url_to_call, data=json_obj, headers=headers, )
+            threading.Thread(target=invoke_url, args=(url_to_call, json_obj)).start()
             msg = "'{}' was sent to next step. This service is ready for another request".format(stock_obj.code)
             
             logging.info(msg)
@@ -53,3 +54,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         logging.error(str(err))
         return func.HttpResponse(body=str(err), status_code=500)
         pass
+
+def invoke_url(url, json):
+    headers = {
+        'content-type': "application/json",
+        'cache-control': "no-cache"
+    }
+
+    requests.request("POST", url, data=json, headers=headers)
+    pass
